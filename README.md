@@ -17,8 +17,8 @@ Setup Process
 
 This repository automates the deployment of Terraform Enterprise (TFE) on a secure, production-ready GKE cluster, with:
 
-**Prerequisites:
-**
+Prerequisites:
+
 - Access to a GCP Project (with Cloud DNS zone)
 
 - gcloud CLI
