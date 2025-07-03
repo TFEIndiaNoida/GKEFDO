@@ -1,65 +1,106 @@
+Terraform Enterprise on GKE
+Provision Terraform Enterprise (TFE) on Google Kubernetes Engine (GKE) in Google Cloud Platform (GCP) with automated DNS, TLS, and production best practices.
 
-# Terraform Enterprise on GKE
+Setup Process
 
-This repository sets up Terraform Enterprise (TFE) on Google Kubernetes Engine (GKE) in Google Cloud Platform (GCP).
+1. Request GCP Project & DNS
 
-Note to self to properly link and credit Patrick Munne & whoever else helped write the GCP openshift doc as I used it extensively to build this.
+2. Set Up GCP Service Account
 
-## Setup Process
+3. Clone and Deploy
 
-Before starting, you will need a GCP Project, a service account, and credentials. 
+4. What Happens After Apply
 
-1. Request GCP project through doormat
-    1. Must set DNS option, recommend account-id though the other option -should- work. If you don't see a zone in your GCP account, you probably missed this and will need to request a new one
-    2. Verify you can access console through doormat to ensure account is set up
-    3. Do this first as it will take some time to set up
-    4. Once console is accessible, search for cloud dns and take note of your domain
+5. Outputs
 
-2. Set up GCP service account for Terraform Cloud
-instructions for installing gcloud cli
-gcloud auth login 
-gcloud auth application-default login 
+6. Accessing TFE
+
+Overview
+This repository automates the deployment of Terraform Enterprise (TFE) on a secure, production-ready GKE cluster, with:
+Automated networking, IAM, storage, and secrets
+Automated public DNS and TLS (Let’s Encrypt)
+Zero manual steps after terraform apply
+
+Prerequisites
+Access to a GCP Project (with Cloud DNS zone)
+gcloud CLI
+Terraform 1.3+
+TFE License file
+
+Setup Process
+1. Request GCP Project & DNS
+Request your GCP project (e.g., via Doormat or your internal process).
+Choose the DNS option (recommended: account-id).
+Verify Cloud DNS zone is created in your project (e.g., hc-xxxx.gcp.sbx.hashicorpdemo.com).
+Access GCP Console to confirm setup.
+
+2. Set Up GCP Service Account
+Generate a service account and credentials for Terraform:
+
+# Authenticate with gcloud (user account)
+gcloud auth login
+
+# Set your project
 gcloud config set project $PROJID
-gcloud iam service-accounts create terraform-cloud --display-name="Terraform Cloud Service Account"
-gcloud projects add-iam-policy-binding hc-8cd228781899442fa5090750bb8 \
-  --member='serviceAccount:hc-8cd228781899442fa5090750bb8@appspot.gserviceaccount.com' \
-  --role='roles/cloudsql.admin'
-gcloud iam service-accounts keys create ~/Desktop/gcp-credentials.json --iam-account=terraform-cloud@$(gcloud config get-value project).iam.gserviceaccount.com
+
+# Create a service account for Terraform
+gcloud iam service-accounts create terraform-cloud \
+  --display-name="Terraform Cloud Service Account"
+
+# Grant required IAM roles (example: Cloud SQL Admin)
+gcloud projects add-iam-policy-binding $PROJID \
+  --member="serviceAccount:terraform-cloud@$PROJID.iam.gserviceaccount.com" \
+  --role="roles/cloudsql.admin"
+
+# Generate and download service account key
+gcloud iam service-accounts keys create ~/Desktop/gcp-credentials.json \
+  --iam-account=terraform-cloud@$PROJID.iam.gserviceaccount.com
+
+# Activate service account for gcloud CLI usage
 gcloud auth activate-service-account --key-file=~/Desktop/gcp-credentials.json
 
-3. How to
-Clone the repository to your local machine
+3. Clone and Deploy
+# Clone this repository
 git clone https://github.com/TFEIndiaNoida/GKEFDO.git
+cd GKEFDO
 
+# Initialize Terraform
 terraform init
-Terraform plan
+
+# Review the plan
+terraform plan
+
+# Apply the configuration
 terraform apply
 
 4. What Happens After Apply
 GKE Cluster, NGINX Ingress, TFE, and ExternalDNS are deployed.
-TFE Helm chart creates an Ingress resource for your chosen hostname (e.g., tfe.hc-8cd228781899442fa5090750bb8.gcp.sbx.hashicorpdemo.com).
-NGINX Ingress controller provisions a public LoadBalancer IP.
-ExternalDNS detects the Ingress and automatically creates an A record in your Google Cloud DNS zone, mapping your hostname to the LoadBalancer IP.
+TFE Helm chart creates an Ingress for your hostname (e.g., tfe.hc-xxxx.gcp.sbx.hashicorpdemo.com).
+NGINX Ingress provisions a public LoadBalancer IP.
+ExternalDNS automatically creates an A record in Cloud DNS, mapping your hostname to the LoadBalancer IP.
+cert-manager issues a TLS certificate via Let’s Encrypt.
 
-5. It should output the resources as below
+5. Outputs
+After a successful apply, you’ll see outputs similar to:
 
-Outputs:
+text
+admin_user                = <sensitive>
+certificate_email         = "ramit.bansal@hashicorp.com"
+gke_cluster_name          = "hc-xxxx-gke"
+gke_cluster_region        = "us-west2"
+postgres_password         = <sensitive>
+postgres_private_ip       = "172.25.1.3"
+postgres_public_ip        = ""
+postgres_username         = "tfeadmin"
+project_id                = "hc-xxxx"
+redis_host                = "172.25.0.3"
+redis_port                = 6379
+tfe_encryption_password   = <sensitive>
+tfe_hostname              = "tfe.hc-xxxx.gcp.sbx.hashicorpdemo.com"
+tfe_license               = <sensitive>
+tfe_version               = "v202503-1"
 
-admin_user = <sensitive>
-certificate_email = "ramit.bansal@hashicorp.com"
-gke_cluster_name = "hc-8cd228781899442fa5090750bb8-gke"
-gke_cluster_region = "us-west2"
-postgres_password = <sensitive>
-postgres_private_ip = "172.25.1.3"
-postgres_public_ip = ""
-postgres_username = "tfeadmin"
-project_id = "hc-8cd228781899442fa5090750bb8"
-redis_host = "172.25.0.3"
-redis_port = 6379
-tfe_encryption_password = <sensitive>
-tfe_hostname = "tfe.hc-8cd228781899442fa5090750bb8.gcp.sbx.hashicorpdemo.com"
-tfe_license = <sensitive>
-tfe_version = "v202503-1"
+6. Accessing TFE
+Open your browser and navigate to the URL shown in tfe_hostname output.
 
-5. Hit the url as mentioned in tfe_hostname   
-
+Log in and complete the Terraform Enterprise setup.
