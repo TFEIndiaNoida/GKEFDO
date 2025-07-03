@@ -77,17 +77,18 @@ terraform apply
 
 4. What Happens After Apply
 
-GKE Cluster, NGINX Ingress, TFE, and ExternalDNS are deployed.
+- GKE Cluster, NGINX Ingress, TFE, and ExternalDNS are deployed.
 
-TFE Helm chart creates an Ingress for your hostname (e.g., tfe.hc-xxxx.gcp.sbx.hashicorpdemo.com).
+- TFE Helm chart creates an Ingress for your hostname (e.g., tfe.hc-xxxx.gcp.sbx.hashicorpdemo.com).
 
-NGINX Ingress provisions a public LoadBalancer IP.
+- NGINX Ingress provisions a public LoadBalancer IP.
 
-ExternalDNS automatically creates an A record in Cloud DNS, mapping your hostname to the LoadBalancer IP.
+- ExternalDNS automatically creates an A record in Cloud DNS, mapping your hostname to the LoadBalancer IP.
 
-Cert-manager issues a TLS certificate via Let’s Encrypt.
+- Cert-manager issues a TLS certificate via Let’s Encrypt.
 
 5. Outputs
+
 After a successful apply, you’ll see outputs similar to:
 
 
