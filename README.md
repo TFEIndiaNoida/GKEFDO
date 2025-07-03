@@ -17,24 +17,49 @@ Before starting, you will need a GCP Project, a service account, and credentials
 
 2. Set up GCP service account for Terraform Cloud
 instructions for installing gcloud cli
-gcloud auth login
-gcloud auth application-default login
+gcloud auth login 
+gcloud auth application-default login 
 gcloud config set project $PROJID
+gcloud iam service-accounts create terraform-cloud --display-name="Terraform Cloud Service Account"
+gcloud projects add-iam-policy-binding hc-8cd228781899442fa5090750bb8 \
+  --member='serviceAccount:hc-8cd228781899442fa5090750bb8@appspot.gserviceaccount.com' \
+  --role='roles/cloudsql.admin'
+gcloud iam service-accounts keys create ~/Desktop/gcp-credentials.json --iam-account=terraform-cloud@$(gcloud config get-value project).iam.gserviceaccount.com
+gcloud auth activate-service-account --key-file=~/Desktop/gcp-credentials.json
 
-   gcloud iam service-accounts create terraform-cloud --display-name="Terraform Cloud Service Account"
+3. How to
+Clone the repository to your local machine
+git clone https://github.com/TFEIndiaNoida/GKEFDO.git
 
-   gcloud projects add-iam-policy-binding $(gcloud config get-value project) \
-     --member="serviceAccount:terraform-cloud@$(gcloud config get-value project).iam.gserviceaccount.com" \
-     --role="roles/owner"
+terraform init
+Terraform plan
+terraform apply
 
-   gcloud iam service-accounts keys create ~/Desktop/gcp-credentials.json \
-     --iam-account=terraform-cloud@$(gcloud config get-value project).iam.gserviceaccount.com
+4. What Happens After Apply
+GKE Cluster, NGINX Ingress, TFE, and ExternalDNS are deployed.
+TFE Helm chart creates an Ingress resource for your chosen hostname (e.g., tfe.hc-8cd228781899442fa5090750bb8.gcp.sbx.hashicorpdemo.com).
+NGINX Ingress controller provisions a public LoadBalancer IP.
+ExternalDNS detects the Ingress and automatically creates an A record in your Google Cloud DNS zone, mapping your hostname to the LoadBalancer IP.
 
-Navigate to https://app.terraform.io/app/hashicorp-support-eng/registry/modules/private/hashicorp-support-eng/gke-fdo/gcp/2.0.0
-Click on Provision Workspace on the top right.
-Configure the module inputs.
-Click on Next: Workspace settings.
-Provide a name for your workspace.
-If desired, select a Project to associate with this workspace.
-Optionally, enter a description and choose your apply method.
-Click on Create workspace to finalize the setup.
+5. It should output the resources as below
+
+Outputs:
+
+admin_user = <sensitive>
+certificate_email = "ramit.bansal@hashicorp.com"
+gke_cluster_name = "hc-8cd228781899442fa5090750bb8-gke"
+gke_cluster_region = "us-west2"
+postgres_password = <sensitive>
+postgres_private_ip = "172.25.1.3"
+postgres_public_ip = ""
+postgres_username = "tfeadmin"
+project_id = "hc-8cd228781899442fa5090750bb8"
+redis_host = "172.25.0.3"
+redis_port = 6379
+tfe_encryption_password = <sensitive>
+tfe_hostname = "tfe.hc-8cd228781899442fa5090750bb8.gcp.sbx.hashicorpdemo.com"
+tfe_license = <sensitive>
+tfe_version = "v202503-1"
+
+5. Hit the url as mentioned in tfe_hostname   
+
