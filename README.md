@@ -17,13 +17,19 @@ Setup Process
 
 This repository automates the deployment of Terraform Enterprise (TFE) on a secure, production-ready GKE cluster, with:
 Automated networking, IAM, storage, and secrets
-Automated public DNS and TLS (Let’s Encrypt)
-Zero manual steps after terraform apply
 
-Prerequisites
+Automated public DNS and TLS (Let’s Encrypt)
+
+No manual steps after terraform apply
+
+Prerequisites:
+
 Access to a GCP Project (with Cloud DNS zone)
+
 gcloud CLI
+
 Terraform 1.3+
+
 TFE License file
 
 Setup Process
