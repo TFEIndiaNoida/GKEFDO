@@ -15,7 +15,6 @@ Setup Process
 
 6. Accessing TFE
 
-Overview
 This repository automates the deployment of Terraform Enterprise (TFE) on a secure, production-ready GKE cluster, with:
 Automated networking, IAM, storage, and secrets
 Automated public DNS and TLS (Let’s Encrypt)
@@ -62,6 +61,7 @@ gcloud auth activate-service-account --key-file=~/Desktop/gcp-credentials.json
 3. Clone and Deploy
 # Clone this repository
 git clone https://github.com/TFEIndiaNoida/GKEFDO.git
+
 cd GKEFDO
 
 # Initialize Terraform
@@ -74,30 +74,49 @@ terraform plan
 terraform apply
 
 4. What Happens After Apply
+
 GKE Cluster, NGINX Ingress, TFE, and ExternalDNS are deployed.
+
 TFE Helm chart creates an Ingress for your hostname (e.g., tfe.hc-xxxx.gcp.sbx.hashicorpdemo.com).
+
 NGINX Ingress provisions a public LoadBalancer IP.
+
 ExternalDNS automatically creates an A record in Cloud DNS, mapping your hostname to the LoadBalancer IP.
-cert-manager issues a TLS certificate via Let’s Encrypt.
+
+Cert-manager issues a TLS certificate via Let’s Encrypt.
 
 5. Outputs
 After a successful apply, you’ll see outputs similar to:
 
-text
+
 admin_user                = <sensitive>
+
 certificate_email         = "ramit.bansal@hashicorp.com"
+
 gke_cluster_name          = "hc-xxxx-gke"
+
 gke_cluster_region        = "us-west2"
+
 postgres_password         = <sensitive>
+
 postgres_private_ip       = "172.25.1.3"
+
 postgres_public_ip        = ""
+
 postgres_username         = "tfeadmin"
+
 project_id                = "hc-xxxx"
+
 redis_host                = "172.25.0.3"
+
 redis_port                = 6379
+
 tfe_encryption_password   = <sensitive>
+
 tfe_hostname              = "tfe.hc-xxxx.gcp.sbx.hashicorpdemo.com"
+
 tfe_license               = <sensitive>
+
 tfe_version               = "v202503-1"
 
 6. Accessing TFE
